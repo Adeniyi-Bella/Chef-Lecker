@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
@@ -69,22 +69,24 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: { id: string } }) {
   try {
-    console.log(`API: Deleting meal with ID: ${params.id}`)
     const supabase = createServerSupabaseClient()
 
-    const { error } = await supabase.from("meals").delete().eq("id", params.id)
+    const id = context.params.id
+    console.log(`API: Deleting meal with ID: ${id}`)
+
+    const { error } = await supabase.from("meals").delete().eq("id", id)
 
     if (error) {
       console.error("API Error deleting meal:", error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return new Response("Failed to delete meal", { status: 500 })
     }
 
     console.log("API: Meal deleted successfully")
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("API: Internal server error:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    return new Response(null, { status: 200 })
+  } catch (err) {
+    console.error("API Unexpected error:", err)
+    return new Response("Unexpected error", { status: 500 })
   }
 }

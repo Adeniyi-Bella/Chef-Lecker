@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/components/ui/use-toast"
 import type { Meal } from "@/lib/types"
-import { useDeleteMeal } from "@/lib/hooks/use-meals"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 interface DeleteMealDialogProps {
   meal: Meal
@@ -22,26 +22,38 @@ interface DeleteMealDialogProps {
 
 export function DeleteMealDialog({ meal, open, onOpenChange }: DeleteMealDialogProps) {
   const { toast } = useToast()
-  const deleteMealMutation = useDeleteMeal()
+  const queryClient = useQueryClient()
+
+  const deleteMealMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/meals/${id}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) {
+        throw new Error("Failed to delete meal")
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Meal deleted",
+        description: "The meal has been deleted successfully.",
+      })
+      queryClient.invalidateQueries({ queryKey: ["meals"] })
+      onOpenChange(false)
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete meal. Please try again.",
+        variant: "destructive",
+      })
+      console.error("Error deleting meal:", error)
+    },
+  })
 
   const handleDelete = () => {
-    deleteMealMutation.mutate(meal.id, {
-      onSuccess: () => {
-        toast({
-          title: "Meal deleted",
-          description: "The meal has been deleted successfully.",
-        })
-        onOpenChange(false)
-      },
-      onError: (error) => {
-        toast({
-          title: "Error",
-          description: "Failed to delete meal. Please try again.",
-          variant: "destructive",
-        })
-        console.error("Error deleting meal:", error)
-      },
-    })
+    deleteMealMutation.mutate(meal.id)
   }
 
   return (

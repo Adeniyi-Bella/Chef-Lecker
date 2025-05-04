@@ -2,8 +2,8 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus, X } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,73 +17,96 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
-import type { Meal } from "@/lib/types"
-import { useUpdateMeal } from "@/lib/hooks/use-meals"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface EditMealDialogProps {
-  meal: Meal
   open: boolean
   onOpenChange: (open: boolean) => void
+  meal: MealData | null
 }
 
-export function EditMealDialog({ meal, open, onOpenChange }: EditMealDialogProps) {
+interface Ingredient {
+  name: string
+  amount: string
+}
+
+interface MealData {
+  id: string
+  name: string
+  userName: string
+  preparation: string
+  ingredients: Ingredient[]
+}
+
+// Simulate API call – replace with real API call
+async function updateMeal(meal: MealData): Promise<void> {
+  const response = await fetch(`/api/meals/${meal.id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(meal),
+  })
+
+  if (!response.ok) {
+    
+    throw new Error("Failed to update meal")
+  }
+}
+
+export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps) {
   const { toast } = useToast()
-  const updateMealMutation = useUpdateMeal()
+  const queryClient = useQueryClient()
 
-  const [name, setName] = useState(meal.name)
-  const [userName, setUserName] = useState(meal.userName)
-  const [preparation, setPreparation] = useState(meal.preparation)
-  const [ingredients, setIngredients] = useState(meal.ingredients)
+  const editMealMutation = useMutation({
+    mutationFn: updateMeal,
+    onSuccess: () => {
+      resetForm()
+      onOpenChange(false)
+      toast({
+        title: "Meal updated",
+        description: "Your meal has been updated successfully.",
+      })
+      queryClient.invalidateQueries({ queryKey: ["meals"] })
+    },
+    onError: (error: any) => {
+      console.error("Error updating meal:", error)
+      setFormError(error.message || "Failed to update meal. Please try again.")
+      toast({
+        title: "Error",
+        description: "Failed to update meal. Please try again.",
+        variant: "destructive",
+      })
+    },
+  })
+
+  const [name, setName] = useState("")
+  const [userName, setUserName] = useState("")
+  const [preparation, setPreparation] = useState("")
+  const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: "", amount: "" }])
   const [formError, setFormError] = useState<string | null>(null)
-
   const [nameError, setNameError] = useState("")
   const [userNameError, setUserNameError] = useState("")
   const [preparationError, setPreparationError] = useState("")
   const [ingredientsError, setIngredientsError] = useState<string[]>([])
 
-  // Reset form when meal changes or dialog opens
   useEffect(() => {
-    if (open) {
+    if (meal) {
       setName(meal.name)
       setUserName(meal.userName)
       setPreparation(meal.preparation)
-      setIngredients(meal.ingredients || [])
-      setNameError("")
-      setUserNameError("")
-      setPreparationError("")
-      setIngredientsError((meal.ingredients || []).map(() => ""))
-      setFormError(null)
+      setIngredients(meal.ingredients)
     }
-  }, [meal, open])
+  }, [meal])
 
-  const addIngredient = () => {
-    setIngredients([...ingredients, { name: "", amount: "" }])
-    setIngredientsError([...ingredientsError, ""])
-  }
-
-  const removeIngredient = (index: number) => {
-    if (ingredients.length > 1) {
-      const newIngredients = [...ingredients]
-      newIngredients.splice(index, 1)
-      setIngredients(newIngredients)
-
-      const newErrors = [...ingredientsError]
-      newErrors.splice(index, 1)
-      setIngredientsError(newErrors)
-    }
-  }
-
-  const updateIngredientName = (index: number, value: string) => {
-    const newIngredients = [...ingredients]
-    newIngredients[index].name = value
-    setIngredients(newIngredients)
-  }
-
-  const updateIngredientAmount = (index: number, value: string) => {
-    const newIngredients = [...ingredients]
-    newIngredients[index].amount = value
-    setIngredients(newIngredients)
+  const resetForm = () => {
+    setName("")
+    setUserName("")
+    setPreparation("")
+    setIngredients([{ name: "", amount: "" }])
+    setNameError("")
+    setUserNameError("")
+    setPreparationError("")
+    setIngredientsError([])
+    setFormError(null)
   }
 
   const validateForm = () => {
@@ -124,6 +147,35 @@ export function EditMealDialog({ meal, open, onOpenChange }: EditMealDialogProps
     return isValid
   }
 
+  const addIngredient = () => {
+    setIngredients([...ingredients, { name: "", amount: "" }])
+    setIngredientsError([...ingredientsError, ""])
+  }
+
+  const removeIngredient = (index: number) => {
+    if (ingredients.length > 1) {
+      const newIngredients = [...ingredients]
+      newIngredients.splice(index, 1)
+      setIngredients(newIngredients)
+
+      const newErrors = [...ingredientsError]
+      newErrors.splice(index, 1)
+      setIngredientsError(newErrors)
+    }
+  }
+
+  const updateIngredientName = (index: number, value: string) => {
+    const newIngredients = [...ingredients]
+    newIngredients[index].name = value
+    setIngredients(newIngredients)
+  }
+
+  const updateIngredientAmount = (index: number, value: string) => {
+    const newIngredients = [...ingredients]
+    newIngredients[index].amount = value
+    setIngredients(newIngredients)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setFormError(null)
@@ -132,49 +184,33 @@ export function EditMealDialog({ meal, open, onOpenChange }: EditMealDialogProps
       return
     }
 
-    try {
-      // Clean up ingredients data
-      const validIngredients = ingredients.filter((ingredient) => ingredient.name.trim() && ingredient.amount.trim())
+    const validIngredients = ingredients.filter((ingredient) => ingredient.name.trim() && ingredient.amount.trim())
 
-      const mealData = {
-        id: meal.id,
-        name,
-        userName,
-        preparation,
-        ingredients: validIngredients,
-      }
-
-      await updateMealMutation.mutate(mealData, {
-        onSuccess: () => {
-          toast({
-            title: "Meal updated",
-            description: "Your meal has been updated successfully.",
-          })
-          onOpenChange(false)
-        },
-        onError: (error) => {
-          console.error("Error in edit meal form:", error)
-          setFormError(error.message || "Failed to update meal. Please try again.")
-          toast({
-            title: "Error",
-            description: "Failed to update meal. Please try again.",
-            variant: "destructive",
-          })
-        },
-      })
-    } catch (err) {
-      console.error("Unexpected error in edit meal form:", err)
-      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred"
-      setFormError(errorMessage)
+    const mealData: MealData = {
+      id: meal?.id || "",
+      name,
+      userName,
+      preparation,
+      ingredients: validIngredients,
     }
+
+    editMealMutation.mutate(mealData)
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          resetForm()
+        }
+        onOpenChange(isOpen)
+      }}
+    >
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Meal</DialogTitle>
-          <DialogDescription>Make changes to your meal recipe.</DialogDescription>
+          <DialogDescription>Edit meal details such as ingredients and preparation instructions.</DialogDescription>
         </DialogHeader>
 
         {formError && (
@@ -185,20 +221,15 @@ export function EditMealDialog({ meal, open, onOpenChange }: EditMealDialogProps
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Meal Name</Label>
-            <Input
-              id="edit-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter meal name"
-            />
+            <Label htmlFor="name">Meal Name</Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter meal name" />
             {nameError && <p className="text-sm text-red-500">{nameError}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-userName">Your Name</Label>
+            <Label htmlFor="userName">Your Name</Label>
             <Input
-              id="edit-userName"
+              id="userName"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="Enter your name"
@@ -248,9 +279,9 @@ export function EditMealDialog({ meal, open, onOpenChange }: EditMealDialogProps
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="edit-preparation">Preparation Instructions</Label>
+            <Label htmlFor="preparation">Preparation Instructions</Label>
             <Textarea
-              id="edit-preparation"
+              id="preparation"
               value={preparation}
               onChange={(e) => setPreparation(e.target.value)}
               placeholder="Enter preparation instructions"
@@ -260,11 +291,18 @@ export function EditMealDialog({ meal, open, onOpenChange }: EditMealDialogProps
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                resetForm()
+                onOpenChange(false)
+              }}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={updateMealMutation.isPending}>
-              {updateMealMutation.isPending ? "Saving..." : "Save Changes"}
+            <Button type="submit" disabled={editMealMutation.isPending}>
+              {editMealMutation.isPending ? "Updating..." : "Update Meal"}
             </Button>
           </DialogFooter>
         </form>

@@ -1,0 +1,90 @@
+import { createServerSupabaseClient } from "@/lib/supabase"
+import { NextResponse } from "next/server"
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  try {
+    console.log(`API: Fetching meal with ID: ${params.id}`)
+    const supabase = createServerSupabaseClient()
+
+    const { data, error } = await supabase.from("meals").select("*").eq("id", params.id).single()
+
+    if (error) {
+      console.error("API Error fetching meal:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    if (!data) {
+      return NextResponse.json({ error: "Meal not found" }, { status: 404 })
+    }
+
+    // Ensure ingredients is always an array
+    const processedData = {
+      ...data,
+      ingredients: Array.isArray(data.ingredients)
+        ? data.ingredients
+        : typeof data.ingredients === "string"
+          ? JSON.parse(data.ingredients)
+          : [],
+    }
+
+    console.log("API: Successfully fetched meal")
+    return NextResponse.json(processedData)
+  } catch (error) {
+    console.error("API: Internal server error:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  try {
+    console.log(`API: Updating meal with ID: ${params.id}`)
+    const meal = await request.json()
+    console.log("API: Update data received:", meal)
+
+    const supabase = createServerSupabaseClient()
+
+    // Ensure ingredients is properly formatted for the database
+    const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : []
+
+    const updatedMeal = {
+      name: meal.name,
+      userName: meal.userName,
+      preparation: meal.preparation,
+      ingredients: ingredients,
+      updatedAt: new Date().toISOString(),
+    }
+
+    const { data, error } = await supabase.from("meals").update(updatedMeal).eq("id", params.id).select()
+
+    if (error) {
+      console.error("API Error updating meal:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    console.log("API: Meal updated successfully")
+    return NextResponse.json(data?.[0] || {})
+  } catch (error) {
+    console.error("API: Internal server error:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  try {
+    console.log(`API: Deleting meal with ID: ${params.id}`)
+    const supabase = createServerSupabaseClient()
+
+    const { error } = await supabase.from("meals").delete().eq("id", params.id)
+
+    if (error) {
+      console.error("API Error deleting meal:", error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    console.log("API: Meal deleted successfully")
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("API: Internal server error:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+  }
+}

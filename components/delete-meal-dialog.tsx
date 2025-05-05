@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { useToastStore } from "@/lib/store"
 import type { Meal } from "@/lib/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -35,12 +36,10 @@ export function DeleteMealDialog({ meal, open, onOpenChange }: DeleteMealDialogP
       }
     },
     onSuccess: () => {
-      toast({
-        title: "Meal deleted",
-        description: "The meal has been deleted successfully.",
-      })
       queryClient.invalidateQueries({ queryKey: ["meals"] })
       onOpenChange(false)
+      useToastStore.getState().setToast("Meal deleted successfully!", "success")
+
     },
     onError: (error) => {
       toast({

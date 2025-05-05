@@ -18,11 +18,14 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToastStore } from "@/lib/store"
 
 interface AddMealDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onSuccess?: () => void // new prop
 }
+
 
 interface Ingredient {
   name: string
@@ -49,7 +52,7 @@ async function createMeal(meal: MealData): Promise<void> {
   }
 }
 
-export function AddMealDialog({ open, onOpenChange }: AddMealDialogProps) {
+export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogProps) {
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -58,11 +61,8 @@ export function AddMealDialog({ open, onOpenChange }: AddMealDialogProps) {
     onSuccess: () => {
       resetForm()
       onOpenChange(false)
-      toast({
-        title: "Meal added",
-        description: "Your meal has been added successfully.",
-      })
       queryClient.invalidateQueries({ queryKey: ["meals"] })
+      useToastStore.getState().setToast("Meal added successfully!", "success")
     },
     onError: (error: any) => {
       console.error("Error adding meal:", error)

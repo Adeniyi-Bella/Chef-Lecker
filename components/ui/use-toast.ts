@@ -184,6 +184,9 @@ function useToast() {
     }
   }, [state])
 
+  console.log(toast);
+  
+
   return {
     ...state,
     toast,

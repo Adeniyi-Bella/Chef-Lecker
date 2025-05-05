@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useToastStore } from "@/lib/store"
 
 interface EditMealDialogProps {
   open: boolean
@@ -47,7 +48,7 @@ async function updateMeal(meal: MealData): Promise<void> {
   })
 
   if (!response.ok) {
-    
+
     throw new Error("Failed to update meal")
   }
 }
@@ -61,11 +62,9 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
     onSuccess: () => {
       resetForm()
       onOpenChange(false)
-      toast({
-        title: "Meal updated",
-        description: "Your meal has been updated successfully.",
-      })
       queryClient.invalidateQueries({ queryKey: ["meals"] })
+      useToastStore.getState().setToast("Meal edited successfully!", "success")
+
     },
     onError: (error: any) => {
       console.error("Error updating meal:", error)

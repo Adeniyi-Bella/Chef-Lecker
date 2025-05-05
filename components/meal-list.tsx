@@ -1,9 +1,7 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,6 +10,7 @@ import { useMeals } from "@/lib/hooks/use-meals"
 import { MealCard } from "@/components/meal-card"
 import { AddMealDialog } from "@/components/add-meal-dialog"
 import { EmptyState } from "@/components/empty-state"
+import { Toast } from "./ui/notification"
 
 export function MealList() {
   const { isAddMealOpen, setIsAddMealOpen } = useMealStore()
@@ -35,6 +34,7 @@ export function MealList() {
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i}>
               <CardContent className="p-4">
@@ -43,21 +43,28 @@ export function MealList() {
                   <Skeleton className="h-4 w-1/2" />
                   <Skeleton className="h-4 w-1/4" />
                 </div>
+
               </CardContent>
             </Card>
           ))}
         </div>
       ) : meals && meals.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {meals.map((meal) => (
+              <MealCard key={meal.id} meal={meal} />
+            ))}
+          </div>
+        </>
       ) : (
         <EmptyState />
       )}
 
-      <AddMealDialog open={isAddMealOpen} onOpenChange={setIsAddMealOpen} />
-    </div>
+<AddMealDialog open={isAddMealOpen} onOpenChange={setIsAddMealOpen} />
+
+<Toast />
+
+
+</div>
   )
 }

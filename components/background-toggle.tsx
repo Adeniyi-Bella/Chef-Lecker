@@ -1,31 +1,32 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import { Sun, Moon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function BackgroundToggle() {
-  const [isWhiteBackground, setIsWhiteBackground] = useState(false)
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  
+  // Avoid hydration mismatch
+  useEffect(() => {    
+    setMounted(true)
+  }, [])  
 
-  // Apply the background color when the state changes
-  useEffect(() => {
-    if (isWhiteBackground) {
-      document.body.classList.add("white-background")
-    } else {
-      document.body.classList.remove("white-background")
-    }
-  }, [isWhiteBackground])
+  if (!mounted) return null
+
+  const isDark = theme === "dark"  
 
   return (
     <Button
       variant="outline"
       size="icon"
-      onClick={() => setIsWhiteBackground(!isWhiteBackground)}
-      aria-label={isWhiteBackground ? "Switch to default background" : "Switch to white background"}
-      title={isWhiteBackground ? "Switch to default background" : "Switch to white background"}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       className="rounded-full h-10 w-10"
     >
-      {isWhiteBackground ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+      {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
     </Button>
   )
 }

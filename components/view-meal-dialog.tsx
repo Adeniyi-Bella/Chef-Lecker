@@ -21,9 +21,16 @@ interface ViewMealDialogProps {
 }
 
 export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps) {
-  // Ensure ingredients is an array
   const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : []
-
+  const preparation: string[] = (() => {
+    try {
+      const parsed = JSON.parse(meal.preparation)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  })()
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -37,7 +44,7 @@ export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps
           <div>
             <h3 className="text-sm font-medium mb-2">Ingredients</h3>
             {ingredients.length > 0 ? (
-              <ul className="space-y-1">
+              <ul className="space-y-1 list-decimal list-inside">
                 {ingredients.map((ingredient, index) => (
                   <li key={index} className="text-sm">
                     <span className="font-medium">{ingredient.name}</span>: {ingredient.amount}
@@ -51,7 +58,15 @@ export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps
           <Separator />
           <div>
             <h3 className="text-sm font-medium mb-2">Preparation Instructions</h3>
-            <p className="text-sm whitespace-pre-line">{meal.preparation}</p>
+            {preparation.length > 0 ? (
+              <ol className="list-decimal list-inside space-y-1 text-sm">
+                {preparation.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ol>
+            ) : (
+              <p className="text-sm text-muted-foreground">No preparation steps listed</p>
+            )}
           </div>
         </div>
         <DialogFooter>

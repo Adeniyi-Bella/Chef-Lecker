@@ -24,6 +24,7 @@ export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps
   const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : []
   const preparation: string[] = (() => {
     try {
+      if (Array.isArray(meal.preparation)) return meal.preparation
       const parsed = JSON.parse(meal.preparation)
       return Array.isArray(parsed) ? parsed : []
     } catch {
@@ -37,7 +38,7 @@ export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps
         <DialogHeader>
           <DialogTitle>{meal.name}</DialogTitle>
           <DialogDescription>
-            Added by {meal.userName} on {format(new Date(meal.created_at), "MMMM d, yyyy")}
+            Hinzugefügt von {meal.userName} on {format(new Date(meal.created_at), "MMMM d, yyyy")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -52,12 +53,12 @@ export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No ingredients listed</p>
+              <p className="text-sm text-muted-foreground">Keine Zutaten aufgelistet</p>
             )}
           </div>
           <Separator />
           <div>
-            <h3 className="text-sm font-medium mb-2">Preparation Instructions</h3>
+            <h3 className="text-sm font-medium mb-2">Zubereitung Anweisungen</h3>
             {preparation.length > 0 ? (
               <ol className="list-decimal list-inside space-y-1 text-sm">
                 {preparation.map((step, index) => (
@@ -65,12 +66,12 @@ export function ViewMealDialog({ meal, open, onOpenChange }: ViewMealDialogProps
                 ))}
               </ol>
             ) : (
-              <p className="text-sm text-muted-foreground">No preparation steps listed</p>
+              <p className="text-sm text-muted-foreground">Keine Zubereitungschritt aufgelisted</p>
             )}
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => onOpenChange(false)}>Close</Button>
+          <Button onClick={() => onOpenChange(false)}>Schließen</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

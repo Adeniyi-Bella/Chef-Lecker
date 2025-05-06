@@ -59,18 +59,18 @@ export function DeleteMealDialog({ meal, open, onOpenChange }: DeleteMealDialogP
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the meal &quot;{meal.name}&quot;. This action cannot be undone.
+            Diese würde die Gericht loschen &quot;{meal.name}&quot;. Diese Aktion kann nicht rückgängig gemacht werden.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {deleteMealMutation.isPending ? "Deleting..." : "Delete"}
+            {deleteMealMutation.isPending ? "Löschen..." : "Löschen"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -25,10 +25,10 @@ export function MealList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Meals</h2>
+        <h2 className="text-2xl font-semibold">Gericht</h2>
         <Button onClick={() => setIsAddMealOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Add Meal
+          Gericht hinzufügen
         </Button>
       </div>
 

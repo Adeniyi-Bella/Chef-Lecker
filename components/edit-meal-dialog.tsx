@@ -60,7 +60,7 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
           return []
         }
       })()
-      
+
       setPreparationSteps(preparation)
       setIngredients(meal.ingredients.length ? meal.ingredients : [{ name: "", amount: "" }])
       setPreparationError(preparation?.map(() => "") || [""])
@@ -130,8 +130,8 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen) }}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Meal</DialogTitle>
-          <DialogDescription>Modify meal details, ingredients, and preparation steps.</DialogDescription>
+          <DialogTitle>Gericht Bearbeitung</DialogTitle>
+          <DialogDescription>Gericht details, Zutaten, und  Zubereitungschritt aktualisierien.</DialogDescription>
         </DialogHeader>
 
         {formError && (
@@ -140,21 +140,21 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
           </Alert>
         )}
 
+        <div className="space-y-2">
+          <Label htmlFor="userName">Ihre Name</Label>
+          <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} />
+          {userNameError && <p className="text-sm text-red-500">{userNameError}</p>}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name">Meal Name</Label>
+            <Label htmlFor="name">Gericht Name</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
             {nameError && <p className="text-sm text-red-500">{nameError}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="userName">Your Name</Label>
-            <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} />
-            {userNameError && <p className="text-sm text-red-500">{userNameError}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Preparation Steps</Label>
+            <Label>Zubereitungschritt</Label>
             {preparationSteps.map((step, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <Textarea
@@ -184,19 +184,19 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
               </div>
             ))}
             {preparationError.some((e) => e) && (
-              <p className="text-sm text-red-500">All preparation steps must be filled out.</p>
+              <p className="text-sm text-red-500">Alles zubereitung schritte müssen ausgefüllt werden.</p>
             )}
             <Button type="button" variant="outline" size="sm" onClick={() => {
               setPreparationSteps([...preparationSteps, ""])
               setPreparationError([...preparationError, ""])
             }}>
               <Plus className="h-4 w-4 mr-1" />
-              Add Step
+              Schritt hinzufügen
             </Button>
           </div>
 
           <div className="space-y-2">
-            <Label>Ingredients</Label>
+            <Label>Zutaten</Label>
             {ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <Input
@@ -234,14 +234,14 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
               </div>
             ))}
             {ingredientsError.some((e) => e) && (
-              <p className="text-sm text-red-500">Each ingredient must have name and amount.</p>
+              <p className="text-sm text-red-500">Jede Zutat muss mit Namen und Menge angegeben werden.</p>
             )}
             <Button type="button" variant="outline" size="sm" onClick={() => {
               setIngredients([...ingredients, { name: "", amount: "" }])
               setIngredientsError([...ingredientsError, ""])
             }}>
               <Plus className="h-4 w-4 mr-1" />
-              Add Ingredient
+              Zutat hinzufügen
             </Button>
           </div>
 
@@ -254,10 +254,10 @@ export function EditMealDialog({ open, onOpenChange, meal }: EditMealDialogProps
                 onOpenChange(false)
               }}
             >
-              Cancel
+              Abbrechen
             </Button>
             <Button type="submit" disabled={editMealMutation.isPending}>
-              {editMealMutation.isPending ? "Updating..." : "Update Meal"}
+              {editMealMutation.isPending ? "Aktualisierien..." : "Gericht aktualisierien"}
             </Button>
           </DialogFooter>
         </form>

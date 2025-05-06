@@ -177,8 +177,8 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
     }}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Meal</DialogTitle>
-          <DialogDescription>Add a new meal with ingredients and preparation steps.</DialogDescription>
+          <DialogTitle>Neues Gericht hinzufügen</DialogTitle>
+          <DialogDescription>Fügen Sie eine neue Gericht mit Zutaten und Zubereitungsschritten hinzu.</DialogDescription>
         </DialogHeader>
 
         {formError && (
@@ -188,30 +188,31 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name">Meal Name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-            {nameError && <p className="text-sm text-red-500">{nameError}</p>}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="userName">Your Name</Label>
+        <div className="space-y-2">
+            <Label htmlFor="userName">Ihre Name</Label>
             <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} />
             {userNameError && <p className="text-sm text-red-500">{userNameError}</p>}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="name">Gericht Name</Label>
+            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+            {nameError && <p className="text-sm text-red-500">{nameError}</p>}
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Ingredients</Label>
+              <Label>Zutaten</Label>
               <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
                 <Plus className="h-4 w-4 mr-1" />
-                Add Ingredient
+                Zutaten hinzufügen
               </Button>
             </div>
             {ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 mb-2">
-                <Input placeholder="Ingredient name" value={ingredient.name} onChange={(e) => updateIngredientName(index, e.target.value)} />
-                <Input placeholder="Amount" value={ingredient.amount} onChange={(e) => updateIngredientAmount(index, e.target.value)} />
+                <Input placeholder="Zutaten name" value={ingredient.name} onChange={(e) => updateIngredientName(index, e.target.value)} />
+                <Input placeholder="Menge (kg)" value={ingredient.amount} onChange={(e) => updateIngredientAmount(index, e.target.value)} />
                 <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(index)} disabled={ingredients.length <= 1}>
                   <X className="h-4 w-4" />
                 </Button>
@@ -224,16 +225,16 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Preparation Steps</Label>
+              <Label>Zubereitungsschritten</Label>
               <Button type="button" variant="outline" size="sm" onClick={addPreparationStep}>
                 <Plus className="h-4 w-4 mr-1" />
-                Add Step
+                Schritt hinzufügens
               </Button>
             </div>
             {preparationSteps.map((step, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <Textarea
-                  placeholder={`Step ${index + 1}`}
+                  placeholder={`Schritt ${index + 1}`}
                   value={step}
                   onChange={(e) => updatePreparationStep(index, e.target.value)}
                 />
@@ -247,10 +248,10 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }}>
-              Cancel
+              Abbrechen
             </Button>
             <Button type="submit" disabled={addMealMutation.isPending}>
-              {addMealMutation.isPending ? "Adding..." : "Add Meal"}
+              {addMealMutation.isPending ? "Hinzufügen..." : "Gericht hinzufügen"}
             </Button>
           </DialogFooter>
         </form>

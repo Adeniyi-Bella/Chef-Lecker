@@ -44,30 +44,30 @@ export function MealCard({ meal }: MealCardProps) {
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => setIsViewOpen(true)}>
                     <Eye className="h-4 w-4 mr-2" />
-                    View
+                    Zeigen
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
                     <Edit className="h-4 w-4 mr-2" />
-                    Edit
+                    Bearbeitung
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => setIsDeleteOpen(true)}
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash className="h-4 w-4 mr-2" />
-                    Delete
+                    Löschen
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <p className="text-sm text-muted-foreground">Added by {safeMeal.userName}</p>
+            <p className="text-sm text-muted-foreground">Hinzugefügt von {safeMeal.userName}</p>
             <p className="text-xs text-muted-foreground">{format(new Date(safeMeal.created_at), "MMM d, yyyy")}</p>
           </div>
         </CardContent>
         <CardFooter className="p-4 pt-0">
           <Button variant="outline" size="sm" className="w-full" onClick={() => setIsViewOpen(true)}>
             <Eye className="h-4 w-4 mr-2" />
-            View Details
+            Gericht Details Anzeigen
           </Button>
         </CardFooter>
       </Card>

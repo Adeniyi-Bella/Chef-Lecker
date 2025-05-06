@@ -13,9 +13,10 @@ import { DeleteMealDialog } from "@/components/delete-meal-dialog"
 
 interface MealCardProps {
   meal: Meal
+  searchQuery?: string
 }
 
-export function MealCard({ meal }: MealCardProps) {
+export function MealCard({ meal, searchQuery = "" }: MealCardProps){
   const [isViewOpen, setIsViewOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
@@ -27,13 +28,33 @@ export function MealCard({ meal }: MealCardProps) {
     created_at: meal.created_at || new Date().toISOString(),
   }
 
+   // Function to highlight text that matches search query
+   const highlightMatch = (text: string) => {
+    if (!searchQuery.trim()) return text
+
+    const regex = new RegExp(`(${searchQuery.trim()})`, "gi")
+    const parts = text.split(regex)
+
+    if (parts.length <= 1) return text
+
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <mark key={i} className="bg-yellow-200 dark:bg-yellow-800">
+          {part}
+        </mark>
+      ) : (
+        part
+      ),
+    )
+  }
+
   return (
     <>
       <Card>
         <CardContent className="p-4">
           <div className="space-y-2">
             <div className="flex justify-between items-start">
-              <h3 className="font-semibold text-lg line-clamp-1">{safeMeal.name}</h3>
+            <h3 className="font-semibold text-lg line-clamp-1">{highlightMatch(safeMeal.name)}</h3>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon">

@@ -55,5 +55,23 @@
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 0.3s ease;
   }
+}
+
+/* White background mode */
+body.white-background {
+  background-color: white !important;
+}
+
+/* Ensure cards and other elements remain visible on white background */
+body.white-background .card,
+body.white-background .bg-card {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+
+/* Adjust text color for better contrast on white background */
+body.white-background {
+  color: #333;
 }

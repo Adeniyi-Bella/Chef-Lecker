@@ -50,13 +50,15 @@ export function MealCard({ meal }: MealCardProps) {
                     <Edit className="h-4 w-4 mr-2" />
                     Bearbeitung
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => setIsDeleteOpen(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash className="h-4 w-4 mr-2" />
-                    Löschen
-                  </DropdownMenuItem>
+                  {process.env.NEXT_PUBLIC_ENV === "DEVELOPMENT" && (
+                    <DropdownMenuItem
+                      onClick={() => setIsDeleteOpen(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash className="h-4 w-4 mr-2" />
+                      Löschen
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

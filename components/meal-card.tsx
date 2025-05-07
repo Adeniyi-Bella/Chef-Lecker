@@ -6,13 +6,14 @@ import { MoreHorizontal, Eye, Edit, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import type { Meal } from "@/lib/types"
+// import type { Meal } from "@/lib/types"
 import { ViewMealDialog } from "@/components/view-meal-dialog"
 import { EditMealDialog } from "@/components/edit-meal-dialog"
 import { DeleteMealDialog } from "@/components/delete-meal-dialog"
+import { MealData } from "@/types/services/IMealService"
 
 interface MealCardProps {
-  meal: Meal
+  meal: MealData
   searchQuery?: string
 }
 
@@ -90,7 +91,7 @@ export function MealCard({ meal, searchQuery = "" }: MealCardProps){
         <CardFooter className="p-4 pt-0">
           <Button variant="outline" size="sm" className="w-full" onClick={() => setIsViewOpen(true)}>
             <Eye className="h-4 w-4 mr-2" />
-            Gericht Details Anzeigen
+            Show Dish Details
           </Button>
         </CardFooter>
       </Card>

@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase"
+import { count } from "console"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -47,6 +48,9 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : []
 
     const updatedMeal = {
+      country: meal.country,
+      tags: meal.tags,
+      servings: meal.servings,
       name: meal.name,
       userName: meal.userName,
       preparation: meal.preparation,

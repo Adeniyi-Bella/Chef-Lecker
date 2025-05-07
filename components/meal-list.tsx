@@ -49,15 +49,15 @@ export function MealList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Gericht</h2>
+        <h2 className="text-2xl font-semibold">Dishes</h2>
         <Button onClick={() => setIsAddMealOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Gericht hinzufügen
+          Add a new Dish
         </Button>
       </div>
 
       <div className="w-full">
-        <SearchBar onSearch={setSearchQuery} placeholder="Search by meal name..." />
+        <SearchBar onSearch={setSearchQuery} placeholder="Search by dish name..." />
       </div>
 
       {isLoading ? (

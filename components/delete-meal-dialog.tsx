@@ -13,10 +13,11 @@ import {
 import { useToast } from "@/components/ui/use-toast"
 import { useToastStore } from "@/lib/store"
 import type { Meal } from "@/lib/types"
+import { MealData } from "@/types/services/IMealService"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 interface DeleteMealDialogProps {
-  meal: Meal
+  meal: MealData
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -52,7 +53,7 @@ export function DeleteMealDialog({ meal, open, onOpenChange }: DeleteMealDialogP
   })
 
   const handleDelete = () => {
-    deleteMealMutation.mutate(meal.id)
+    deleteMealMutation.mutate(meal.id!)
   }
 
   return (
@@ -61,16 +62,16 @@ export function DeleteMealDialog({ meal, open, onOpenChange }: DeleteMealDialogP
         <AlertDialogHeader>
           <AlertDialogTitle>Sind Sie sicher?</AlertDialogTitle>
           <AlertDialogDescription>
-            Diese würde die Gericht loschen &quot;{meal.name}&quot;. Diese Aktion kann nicht rückgängig gemacht werden.
+            This action would delete the dish &quot;{meal.name}&quot;. This action is irreversible.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {deleteMealMutation.isPending ? "Löschen..." : "Löschen"}
+            {deleteMealMutation.isPending ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

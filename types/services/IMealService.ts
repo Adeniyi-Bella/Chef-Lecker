@@ -16,6 +16,10 @@ export interface AddMealDialogProps {
     userName: string
     preparation: string[]
     ingredients: Ingredient[]
+    country: string
+    tags: string[]
+    servings: number
+    created_at?: string
   }
 
   export interface EditMealDialogProps {

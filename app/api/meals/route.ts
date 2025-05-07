@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase"
+import { count } from "console"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -44,6 +45,9 @@ export async function POST(request: Request) {
     const ingredients = Array.isArray(meal.ingredients) ? meal.ingredients : []
 
     const newMeal = {
+      country: meal.country,
+      servings: meal.servings,
+      tags: meal.tags,
       name: meal.name,
       userName: meal.userName,
       preparation: meal.preparation,

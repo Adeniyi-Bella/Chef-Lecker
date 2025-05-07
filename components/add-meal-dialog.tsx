@@ -21,11 +21,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useToastStore } from "@/lib/store"
 import { createMeal } from "@/lib/services/MealServices"
 import { AddMealDialogProps, Ingredient, MealData } from "@/types/services/IMealService"
+import { TagInput } from "./tag-input"
 
 export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogProps) {
   // const { toast } = useToast()
   const queryClient = useQueryClient()
   const [name, setName] = useState("")
+  const [country, setCountry] = useState("")
   const [userName, setUserName] = useState("")
   const [preparationSteps, setPreparationSteps] = useState<string[]>([""])
   const [preparationError, setPreparationError] = useState<string[]>([""])
@@ -34,6 +36,9 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
   const [nameError, setNameError] = useState("")
   const [userNameError, setUserNameError] = useState("")
   const [ingredientsError, setIngredientsError] = useState<string[]>([])
+  const [tags, setTags] = useState<string[]>([])
+  const [servings, setServings] = useState(2)
+  const [servingsError, setServingsError] = useState("")
 
   const addMealMutation = useMutation({
     mutationFn: createMeal,
@@ -51,14 +56,19 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
 
   const resetForm = () => {
     setName("")
+    setCountry("")
     setUserName("")
     setPreparationSteps([""])
     setIngredients([{ name: "", amount: "" }])
     setNameError("")
+    setTags([])
     setUserNameError("")
     setPreparationError([""])
     setIngredientsError([])
     setFormError(null)
+    setServings(2)
+    setServingsError("")
+
   }
 
   const validateForm = () => {
@@ -66,7 +76,7 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
     setFormError(null)
 
     if (!name.trim()) {
-      setNameError("Meal name is required")
+      setNameError("Dish name is required")
       isValid = false
     } else {
       setNameError("")
@@ -87,6 +97,13 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
       return ""
     })
     setPreparationError(newPreparationError)
+
+    if (servings < 1) {
+      setServingsError("Number of servings must be at least 1")
+      isValid = false
+    } else {
+      setServingsError("")
+    }
 
     const newIngredientsError = ingredients.map((ingredient) => {
       if (!ingredient.name.trim() || !ingredient.amount.trim()) {
@@ -165,7 +182,13 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
       userName,
       preparation: preparationSteps,
       ingredients: validIngredients,
+      country,
+      tags,
+      servings
     }
+
+    console.log("Meal data to be submitted:", mealData);
+    
 
     addMealMutation.mutate(mealData)
   }
@@ -177,8 +200,8 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
     }}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Neues Gericht hinzufügen</DialogTitle>
-          <DialogDescription>Fügen Sie eine neue Gericht mit Zutaten und Zubereitungsschritten hinzu.</DialogDescription>
+          <DialogTitle>Add New Dishes</DialogTitle>
+          <DialogDescription>Add a new meal with ingredients and preparation instructions.</DialogDescription>
         </DialogHeader>
 
         {formError && (
@@ -189,24 +212,30 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
-        <div className="space-y-2">
-            <Label htmlFor="userName">Ihre Name</Label>
+          <div className="space-y-2">
+            <Label htmlFor="userName">Your Name</Label>
             <Input id="userName" value={userName} onChange={(e) => setUserName(e.target.value)} />
             {userNameError && <p className="text-sm text-red-500">{userNameError}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Gericht Name</Label>
+            <Label htmlFor="name">Name of Dish</Label>
             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
             {nameError && <p className="text-sm text-red-500">{nameError}</p>}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="country">Country of Dish</Label>
+            <Input id="country" value={country} onChange={(e) => setCountry(e.target.value)} />
+            {/* {nameError && <p className="text-sm text-red-500">{nameError}</p>} */}
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Zutaten</Label>
+              <Label>Ingredients</Label>
               <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
                 <Plus className="h-4 w-4 mr-1" />
-                Zutaten hinzufügen
+                Add Ingredient
               </Button>
             </div>
             {ingredients.map((ingredient, index) => (
@@ -223,18 +252,26 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
             )}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="tags">Tags</Label>
+            <TagInput value={tags} onChange={setTags} />
+            <p className="text-xs text-muted-foreground">
+              Add tags like vegan, easy, quick, beef, etc. to help with filtering
+            </p>
+          </div>
+
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Zubereitungsschritten</Label>
+              <Label>Preparation Steps</Label>
               <Button type="button" variant="outline" size="sm" onClick={addPreparationStep}>
                 <Plus className="h-4 w-4 mr-1" />
-                Schritt hinzufügens
+                Add New Step
               </Button>
             </div>
             {preparationSteps.map((step, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <Textarea
-                  placeholder={`Schritt ${index + 1}`}
+                  placeholder={`Step ${index + 1}`}
                   value={step}
                   onChange={(e) => updatePreparationStep(index, e.target.value)}
                 />
@@ -246,12 +283,25 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
             ))}
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="servings">Number of Servings</Label>
+            <Input
+              id="servings"
+              type="number"
+              min="1"
+              value={servings}
+              onChange={(e) => setServings(Number.parseInt(e.target.value) || 0)}
+              placeholder="Enter number of servings"
+            />
+            {servingsError && <p className="text-sm text-red-500">{servingsError}</p>}
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { resetForm(); onOpenChange(false); }}>
-              Abbrechen
+              Cancel
             </Button>
             <Button type="submit" disabled={addMealMutation.isPending}>
-              {addMealMutation.isPending ? "Hinzufügen..." : "Gericht hinzufügen"}
+              {addMealMutation.isPending ? "Adding..." : "Add Dish"}
             </Button>
           </DialogFooter>
         </form>

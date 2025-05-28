@@ -98,10 +98,10 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
     if (comments) prompt += `  "comments": "${comments}",\n`;
     prompt += `}\n\n`;
 
-    prompt += `Generate the output strictly in the following JSON format:\n`;
+    prompt += `You are a meal planning assistant. Based on the user's input, Generate the output strictly in the following JSON format:\n`;
     prompt += `{\n  "Dish name": "",\n  "Country": "",\n  "ingredients": [ { "name": "", "amount": "" }, ... ],\n`;
     prompt += `  "preparation": [ "Step 1", "Step 2", ... ],\n  "tags": [ "tag1", "tag2" ],\n  "How many people": "",\n  "comments": ""\n}\n\n`;
-    prompt += `Only return valid JSON. Do not explain.`;
+    prompt += `Only return valid JSON. Do not explain anything. Do not use Markdown or code blocks.`;
 
     return prompt;
   }

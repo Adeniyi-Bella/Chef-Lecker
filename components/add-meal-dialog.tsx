@@ -39,6 +39,8 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
   const [tags, setTags] = useState<string[]>([])
   const [servings, setServings] = useState(2)
   const [servingsError, setServingsError] = useState("")
+  const [isAiLoading, setIsAiLoading] = useState(false)
+  const [comments, setComments] = useState("")
 
   const addMealMutation = useMutation({
     mutationFn: createMeal,
@@ -66,10 +68,44 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
     setPreparationError([""])
     setIngredientsError([])
     setFormError(null)
-    setServings(2)
+    setServings(0)
     setServingsError("")
+    setComments("")
 
   }
+
+
+  function generateMealPrompt({
+    name,
+    country,
+    ingredients,
+    tags,
+    comments,
+  }: {
+    name?: string;
+    country?: string;
+    ingredients?: { name: string; amount: string }[];
+    tags?: string[];
+    comments?: string;
+  }) {
+    let prompt = `Generate a complete meal JSON object based on the fields provided. If a field is missing, fill it in with a plausible value.\n\n`;
+
+    prompt += `Provided input:\n{\n`;
+    if (name) prompt += `  "Dish name": "${name}",\n`;
+    if (country) prompt += `  "Country": "${country}",\n`;
+    if (ingredients?.length) prompt += `  "ingredients": ${JSON.stringify(ingredients)},\n`;
+    if (tags?.length) prompt += `  "tags": ${JSON.stringify(tags)},\n`;
+    if (comments) prompt += `  "comments": "${comments}",\n`;
+    prompt += `}\n\n`;
+
+    prompt += `Generate the output strictly in the following JSON format:\n`;
+    prompt += `{\n  "Dish name": "",\n  "Country": "",\n  "ingredients": [ { "name": "", "amount": "" }, ... ],\n`;
+    prompt += `  "preparation": [ "Step 1", "Step 2", ... ],\n  "tags": [ "tag1", "tag2" ],\n  "How many people": "",\n  "comments": ""\n}\n\n`;
+    prompt += `Only return valid JSON. Do not explain.`;
+
+    return prompt;
+  }
+
 
   const validateForm = () => {
     let isValid = true
@@ -188,7 +224,7 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
     }
 
     console.log("Meal data to be submitted:", mealData);
-    
+
 
     addMealMutation.mutate(mealData)
   }
@@ -211,6 +247,68 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex items-center gap-2 justify-around">
+
+            <Button
+              type="button"
+              size="sm"
+              disabled={isAiLoading}
+              onClick={async () => {
+                setIsAiLoading(true)
+
+                try {
+
+                  const prompt = generateMealPrompt({ name, country, ingredients, tags, comments })
+                  const res = await fetch("/api/ai-complete-meal", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ prompt }),
+                  })
+
+                  const data = await res.json()
+
+                  setName(data["Dish name"] || "")
+                  setCountry(data["Country"] || "")
+                  setIngredients(data.ingredients || [{ name: "", amount: "" }])
+                  setPreparationSteps(data.preparation || [""])
+                  setTags(data.tags || [])
+                  setServings(data["How many people"] || 2)
+                } catch (error) {
+                  console.error("AI request failed", error)
+                  setFormError("Failed to auto-complete with AI. Try again.")
+                } finally { setIsAiLoading(false) }
+
+              }}
+            >
+              {isAiLoading ? "Completing..." : (
+                <>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Complete form with AI
+                </>
+              )}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={resetForm}
+            >
+              <X className="h-4 w-4 mr-1" />
+              Clear Form
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="comments">Comments (Optional)</Label>
+            <Textarea
+              id="comments"
+              value={comments}
+              onChange={(e) => setComments(e.target.value)}
+              placeholder="Add any additional comments for AI to consider..."
+            />
+          </div>
+
+          <DialogDescription>Fill form manually or auto complete form with AI or partially fill the form and complete the remaining part of the form with AI.</DialogDescription>
 
           <div className="space-y-2">
             <Label htmlFor="userName">Your Name</Label>
@@ -240,8 +338,8 @@ export function AddMealDialog({ open, onOpenChange, onSuccess }: AddMealDialogPr
             </div>
             {ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2 mb-2">
-                <Input placeholder="Zutaten name" value={ingredient.name} onChange={(e) => updateIngredientName(index, e.target.value)} />
-                <Input placeholder="Menge (kg)" value={ingredient.amount} onChange={(e) => updateIngredientAmount(index, e.target.value)} />
+                <Input placeholder="Name of Ingredient" value={ingredient.name} onChange={(e) => updateIngredientName(index, e.target.value)} />
+                <Input placeholder="Qty (kg)" value={ingredient.amount} onChange={(e) => updateIngredientAmount(index, e.target.value)} />
                 <Button type="button" variant="ghost" size="icon" onClick={() => removeIngredient(index)} disabled={ingredients.length <= 1}>
                   <X className="h-4 w-4" />
                 </Button>

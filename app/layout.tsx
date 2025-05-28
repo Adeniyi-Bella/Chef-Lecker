@@ -3,7 +3,6 @@
 import React from "react"
 import { Inter } from "next/font/google"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -18,6 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.jpeg" type="image/x-icon" />
+        <title>Chef-Lecker</title>
+      </head>
       <body className={inter.className}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem = {false}>

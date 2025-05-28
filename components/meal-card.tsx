@@ -84,7 +84,7 @@ export function MealCard({ meal, searchQuery = "" }: MealCardProps){
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <p className="text-sm text-muted-foreground">Hinzugefügt von {safeMeal.userName}</p>
+            <p className="text-sm text-muted-foreground">Added by {safeMeal.userName}</p>
             <p className="text-xs text-muted-foreground">{format(new Date(safeMeal.created_at), "MMM d, yyyy")}</p>
           </div>
         </CardContent>
